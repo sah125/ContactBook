@@ -5,12 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Contact Book</title>
-    
 </head>
 <body>
-    <div id="table">Contact loading....</div>
-    <button id="refresh" type="button">Refresh</button>
-    <button id="addContact" type="button">Add Contact</button>
+    <header class="sticky-header">
+        <div class="header-content">
+            <h1>Contact Book</h1>
+            <div class="header-actions">
+                <button id="refresh" type="button" class="header-btn">Refresh Contacts</button>
+                <button id="addContact" type="button" class="header-btn primary-btn">+ Add Contact</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="table">Loading contacts...</div>
+    </main>
 
     <script src="config.js"></script>
     <script>
@@ -18,35 +27,62 @@
         document.getElementById("addContact").addEventListener('click', addContact);
         
         function fetchContacts() {
+            // Show loading state
+            document.getElementById("table").innerHTML = "Loading contacts...";
+            
             fetch(rootPath + "controller/get-contacts/")
                 .then(function(response) {
-            
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
                     return response.json();
                 })
                 .then(function(data) {
                     displayOutput(data);
-                    console.log(data);
                 })
-
-             
+                .catch(function(error) {
+                    document.getElementById("table").innerHTML = `
+                        <div class="error-message">
+                            Error loading contacts. Please try again.
+                        </div>
+                    `;
+                    console.error('Error:', error);
+                });
         }
 
         function displayOutput(data) {
-            let output = "<table>";
+            if (!data || Object.keys(data).length === 0) {
+                document.getElementById("table").innerHTML = `
+                    <div class="empty-state">
+                        No contacts found. Add your first contact!
+                    </div>
+                `;
+                return;
+            }
+
+            let output = `
+                <table class="contacts-table">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             
             for(let a in data) {
-              
-                    output += `
-                    <tr onclick="editContact(${data[a].id})" style="cursor: pointer;">
-                        <td><img src="${rootPath}controller/uploads/${data[a].avatar}" width="40"/></td>
-                        <td><h5>${data[a].firstname}</h5></td>
-                        <td><h5>${data[a].lastname}</h5></td>                        
+                output += `
+                    <tr onclick="editContact(${data[a].id})">
+                        <td><img src="${rootPath}controller/uploads/${data[a].avatar}" alt="${data[a].firstname}'s photo" class="contact-avatar"></td>
+                        <td>${data[a].firstname}</td>
+                        <td>${data[a].lastname}</td>
                     </tr>
-                    `
-                
+                `;
             }
             
-            output += "</table>";
+            output += `</tbody></table>`;
             document.getElementById("table").innerHTML = output;
         }
         
