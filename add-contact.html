@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Contact</title>
+</head>
+<body>
+    <br>
+    <form id="editForm">
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" name="firstname" required><br>
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" name="lastname" required><br>
+        <label for="mobile">Mobile:</label>
+        <input type="text" id="mobile" name="mobile" required><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+        <label for="avatar">Avatar:</label>
+        <input type="file" id="avatar" name="avatar" accept="image/*" required><br>
+        <button type="submit" id="submitForm">Submit</button>
+    </form>
+    <br>
+    <button id="homeLink" type="button">Home</button>
+    
+    <script src="config.js"></script>
+    <script>
+        document.getElementById("submitForm").addEventListener('click', submitForm);
+        document.getElementById("homeLink").addEventListener('click', goHome);
+
+        async function submitForm(e) {
+            e.preventDefault();
+            
+            const form = new FormData(document.querySelector("#editForm"));
+            form.append("apiKey", localStorage.getItem("apiKey"));
+
+            try {
+                const response = await fetch(rootPath + 'controller/insert-contact/', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: form
+                });
+
+                const data = await response.text();
+                
+                if (data === "1") {
+                    alert("Contact added successfully!");
+                    goHome();
+                } else {
+                    alert("Error adding contact: " + data);
+                    goHome();
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+                goHome();
+            }
+        }
+
+        function goHome() {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

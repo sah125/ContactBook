@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit_Contact</title>
+</head>
+<body>
+    <div id="avatarImage"></div>
+    <form id="editForm">
+        <label for="firstname">First Name:</label>
+<input type="text" id="firstname" name="firstname" readonly><br>
+
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" name="lastname" readonly><br>
+
+        <label for="mobile">Mobile:</label>
+        <input type="text" id="mobile" name="mobile" readonly><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" readonly><br>
+
+        <label for="avatar" hidden>Change profile image :</label>
+        <input type="file" id="avatar" name="avatar" hidden><br>
+
+        <button type="submit" id="submitForm">Update Contact</button>
+    </form>
+    <br /><br />
+    <button id="homeLink" type="button">Home</button>
+    <button id="edit-contact" type="button">Edit Contact</button>
+    <button id="delete-contact" type="button">Delete Contact</button>
+
+    <script src="config.js"></script>
+
+    <script>
+        var id = getId();
+        console.log("The id is " + id);
+        function getId(){
+            var url = window.location.href;
+            var pos = url.search("=");
+            var id = url.slice(pos + 1);
+            return id;
+        }
+    </script>
+    
+</body>
+</html>
