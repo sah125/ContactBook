@@ -3,45 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Edit_Contact</title>
 </head>
-<body>
+<body onload="getContact()">
+    <!-- Avatar image will be displayed here -->
     <div id="avatarImage"></div>
     <form id="editForm">
+        <!-- First Name (read-only) -->
         <label for="firstname">First Name:</label>
-<input type="text" id="firstname" name="firstname" readonly><br>
+        <input type="text" id="firstname" name="firstname" readonly><br>
 
+        <!-- Last Name (read-only) -->
         <label for="lastname">Last Name:</label>
         <input type="text" id="lastname" name="lastname" readonly><br>
 
+        <!-- Mobile (read-only) -->
         <label for="mobile">Mobile:</label>
         <input type="text" id="mobile" name="mobile" readonly><br>
 
+        <!-- Email (read-only) -->
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" readonly><br>
 
+        <!-- Hidden input for changing profile image -->
         <label for="avatar" hidden>Change profile image :</label>
         <input type="file" id="avatar" name="avatar" hidden><br>
 
+        <!-- Button to submit form and update contact -->
         <button type="submit" id="submitForm">Update Contact</button>
     </form>
     <br /><br />
+    <!-- Navigation buttons -->
     <button id="homeLink" type="button">Home</button>
     <button id="edit-contact" type="button">Edit Contact</button>
     <button id="delete-contact" type="button">Delete Contact</button>
 
+    <!-- Include configuration file -->
     <script src="config.js"></script>
 
     <script>
+        // Add event listener to Home button
+        document.getElementById("homeLink").addEventListener("click", homeLink);
+        // Add event listener to Edit Contact button
+        document.getElementById("edit-contact").addEventListener("click", editContact);
+        // Add event listener to Submit Form button
+        document.getElementById("submitForm").addEventListener("click", SubmitForm);
+        // Add event listener to Delete Contact button
+        document.getElementById("delete-contact").addEventListener("click", deleteContact);
+        
+
+        // Get contact ID from URL
         var id = getId();
-        console.log("The id is " + id);
+       
+
+        // Function to extract ID from URL
         function getId(){
             var url = window.location.href;
             var pos = url.search("=");
             var id = url.slice(pos + 1);
             return id;
         }
-    </script>
+
+        // Function to fetch contact details from server (first version)
+        function getContact() {
+            fetch(rootPath + 'controller/get-contacts/?id=' + id)
+                .then(function(response) {
+                   return response.json();
+                })
+                .then(function(data) {
+                    displayOutput(data);
+                })
+        }
+
+        // Function to fetch contact details from server (second version, duplicate)
+        function getContact() {
+            fetch(rootPath + 'controller/get-contacts/?id=' + id)
+                    .then((response) => response.json())
+                    .then(function (data) {
+                        displayOutput(data);
+                    })
+        }
+
+        // Function to navigate to home page
+        function homeLink() {
+            window.open("index.html", "_self");
+        }
+
+        // fuction to display contact data
+        function displayOutput(data) {
+            avatarImg = `
+                <img src="${rootPath}/controller/uploads/${data[0].avatar}" width = "200"/>
+                `
+            document.getElementById("avatarImage").innerHTML = avatarImg;
+            document.getElementById("firstname").value = data[0].firstname;
+            document.getElementById("lastname").value = data[0].lastname;
+            document.getElementById("mobile").value = data[0].mobile;
+            document.getElementById("email").value = data[0].email;
+        }
+
+        function editContact(){
+            document.getElementById("firstname").readOnly = false;
+            document.getElementById("lastname").readOnly = false;
+            document.getElementById("mobile").readOnly = false;
+            document.getElementById("email").readOnly = false;
+            document.getElementById("avatar").hidden = false;
+            document.getElementById("submitForm").hidden = false;
+
+        }
+        function SubmitForm(e) {
+            e.preventDefault();
+            const form = new FormData(document.querySelector("#editForm"));
+            form.append("id", id);
+            form.append("apiKey", apiKey);
+
+            fetch(rootPath + 'controller/edit-contact/', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, *.*'
+                },
+                body: form
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data === "1") {
+                    alert("Contact updated successfully!");
+                    homeLink();
+                } else {
+                    alert("Error updating contact: " + data);
+                    homeLink
+                }
+            })
+            .catch(error => {
+                alert("Error: " + error.message);
+            });
+        }
+
+        function deleteContact() {
+            var confirmDelete = confirm("Are you sure you want to delete this contact?");
+            if (confirmDelete) {
+                fetch(rootPath + 'controller/delete-contact/?id=' + id )
+                    .then(response => response.text())
+                    .then(data => {
+                        if (data === "1") {
+                            alert("Contact deleted successfully!");
+                            homeLink();
+                        } else {
+                            alert("Error deleting contact: " + data);
+                        }
+                    })
+                    .catch(error => {
+                        alert("Error: " + error.message);
+                    });
+            }
+        }
+
+    </script> 
+
     
 </body>
 </html>
